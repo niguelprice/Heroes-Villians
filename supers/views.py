@@ -1,3 +1,4 @@
+from http.client import ResponseNotReady
 from re import T
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
@@ -15,6 +16,18 @@ def Supers_list(request):
         queryset = Super.objects.all()
         if super_types_type:
             queryset = queryset.filter(super_type__type=super_types_type)
+        else:
+            supers = Super.objects.all()
+            hero = supers.filter(super_type__type = 'hero')
+            villian = supers.filter(super_type__type = 'villian')
+            hero_serialized = SuperSerializer(hero,many=True)
+            villain_serialized = SuperSerializer(villian,many=True)
+            custom_response = {
+                'heroes':hero_serialized.data,
+                'villains':villain_serialized.data
+            }
+            return Response(custom_response)
+
         serializer = SuperSerializer(queryset, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
